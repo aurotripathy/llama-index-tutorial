@@ -149,7 +149,16 @@ class PGVectorStoreWithLlamaIndex():
         )
         # returns a VectorStoreQueryResult
         query_result = self.vector_store.query(vector_store_query)
-        return query_result.nodes[0].get_content()
+
+        from llama_index.core.schema import NodeWithScore
+        nodes_with_scores = []
+        for index, node in enumerate(query_result.nodes):
+            score: Optional[float] = None
+            if query_result.similarities is not None:
+                score = query_result.similarities[index]
+            nodes_with_scores.append(NodeWithScore(node=node, score=score))
+            print(f"***** score: {score}\n***** node content: {node.get_content()}")
+        return nodes_with_scores
 
 
 if __name__ == "__main__":
@@ -157,4 +166,4 @@ if __name__ == "__main__":
     documents = pgvector.load_data("data")
     nodes = pgvector.generate_embeddings(documents)
     pgvector.add_nodes_to_pgvector_DB(nodes)
-    print(pgvector.query_low_level("Who does Paul Graham think of with the word schtick?"))
+    pgvector.query_low_level("Who does Paul Graham think of with the word schtick?")
