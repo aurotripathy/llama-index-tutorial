@@ -159,4 +159,6 @@ if __name__ == "__main__":
     documents = pgvector.load_data("data")
     pgvector.generate_embeddings(documents)
     pgvector.build_index()
-    print(pgvector.query("Who does Paul Graham think of with the word schtick?"))
+    print(f'Question:"Who does Paul Graham think of with the word schtick?"):\n Response: {pgvector.query("Who does Paul Graham think of with the word schtick?")}')
+
+    
