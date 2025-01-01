@@ -64,7 +64,7 @@ class PGVectorStoreWithLlamaIndex():
             table_name="generic_table",
             embed_dim=1536,  # openai embedding dimension
         )
-        # Thats it! We're using the low-level interface to create a vector store
+        # Thats it! We're using the low-level interface to create a context
     
     from llama_index.core import Document
     def generate_embeddings(self, documents: List[Document]):
