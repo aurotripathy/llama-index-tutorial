@@ -117,11 +117,18 @@ class PGVectorStoreWithLlamaIndex():
         return nodes
     
     
-    def add_nodes_to_pgvector_DB(self, nodes: List[TextNode]):
+    def add(self, embeddings: List[TextNode]):
+        """Add vector embeddings to vector stores
+
+        Args:
+            nodes: List of nodes
+        Returns:
+            List of ids of the embeddings
+        """
         # 5. Load Nodes into a Vector Store
         # We now insert these nodes into our PostgresVectorStore.
 
-        self.vector_store.add(nodes)
+        self.vector_store.add(embeddings)
 
     def load_data(self, document_names: List[str]):
         self.documents = SimpleDirectoryReader(document_names).load_data()
@@ -182,13 +189,15 @@ if __name__ == "__main__":
     from llama_index.llms.openai import OpenAI
 
     query_str = "Who does Paul Graham think of with the word schtick?"
+    print(f"query_str: {query_str}")
+    
     llm = OpenAI(
     model=generating_model_name, # api_key="some key",  # uses OPENAI_API_KEY env var by default
     )
     pgvector = PGVectorStoreWithLlamaIndex(url="postgresql://postgres:password@localhost:5432", document_names="data/") # directory, not file
     documents = pgvector.load_data("data")
     nodes = pgvector.generate_embeddings(documents)
-    pgvector.add_nodes_to_pgvector_DB(nodes)
+    pgvector.add(nodes)
     # retrieved_nodes = pgvector.query_for_low_level_results(query_str)
     retriever = pgvector.build_retriever()
     from llama_index.core.query_engine import RetrieverQueryEngine
