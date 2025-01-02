@@ -147,37 +147,6 @@ class PGVectorStoreWithLlamaIndex():
     def query(self, query_string: str) -> str:
         return self.query_engine.query(query_string)
 
-    # TODO: remove this, or find a use for it
-    # def query_for_low_level_results(self, query_string: str) -> List[NodeWithScore]:
-
-    #     # Generate a Query Embedding
-    #     query_embedding = self.embed_model.get_query_embedding(query_string)
-        
-    #     # 2. Query the Vector Database
-    #     # construct vector store query
-    #     from llama_index.core.vector_stores import VectorStoreQuery
-
-    #     query_mode = "default"
-    #     # query_mode = "sparse"
-    #     # query_mode = "hybrid"
-
-    #     vector_store_query = VectorStoreQuery(
-    #         query_embedding=query_embedding, similarity_top_k=5, mode=query_mode
-    #     )
-    #     # returns a VectorStoreQueryResult
-    #     query_result = self.vector_store.query(vector_store_query)
-
-        
-    #     nodes_with_scores = []
-    #     for index, node in enumerate(query_result.nodes):
-    #         score: Optional[float] = None
-    #         if query_result.similarities is not None:
-    #             score = query_result.similarities[index]
-    #         nodes_with_scores.append(NodeWithScore(node=node, score=score))
-    #         nodes.append(node)
-    #         print(f"***** score: {score}\n***** node content: {node.get_content()}")
-    #     return nodes_with_scores
-
     def build_retriever(self):
         from retriever import VectorDBRetriever
         retriever = VectorDBRetriever(vector_store=self.vector_store, embed_model=self.embed_model)
@@ -207,10 +176,11 @@ if __name__ == "__main__":
     retrieved_nodes = query_engine.retriever._retrieve(QueryBundle(query_str))   
     print(f"retrieved_nodes: {retrieved_nodes}")
 
-    # kotaemon format
-    retrieved_nodes_for_kotaemon, scores_for_kotaemon = query_engine.retriever.retrieve_for_kotaemon(QueryBundle(query_str))
+    # kotaemon integration format
+    retrieved_nodes_for_kotaemon, scores_for_kotaemon, ids_for_kotaemon = query_engine.retriever.retrieve_for_kotaemon(QueryBundle(query_str))
     print(f"retrieved_nodes_for_kotaemon: {retrieved_nodes_for_kotaemon}")
     print(f"scores_for_kotaemon: {scores_for_kotaemon}")
+    print(f"ids_for_kotaemon: {ids_for_kotaemon}")
 
     response = query_engine.query(query_str)
     print(str(response))
