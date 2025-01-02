@@ -45,7 +45,7 @@ class VectorDBRetriever(BaseRetriever):
                 score = query_result.similarities[index]
             nodes.append(node)
             scores.append(score)
-        return tuple(nodes, scores)
+        return nodes, scores
 
 
     def _retrieve(self, query_bundle: QueryBundle) -> List[NodeWithScore]:
