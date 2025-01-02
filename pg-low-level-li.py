@@ -28,6 +28,7 @@ import psycopg2
 
 # constants
 embed_model_name = "text-embedding-3-small"
+generating_model_name = "gpt-4o-mini"
 
 
 # class PGVectorStoreWithLlamaIndex(LlamaIndexVectorStore):
@@ -182,7 +183,7 @@ if __name__ == "__main__":
 
     query_str = "Who does Paul Graham think of with the word schtick?"
     llm = OpenAI(
-    model="gpt-4o-mini", # api_key="some key",  # uses OPENAI_API_KEY env var by default
+    model=generating_model_name, # api_key="some key",  # uses OPENAI_API_KEY env var by default
     )
     pgvector = PGVectorStoreWithLlamaIndex(url="postgresql://postgres:password@localhost:5432", document_names="data/") # directory, not file
     documents = pgvector.load_data("data")
