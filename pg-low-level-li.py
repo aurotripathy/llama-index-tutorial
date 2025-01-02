@@ -21,7 +21,7 @@ from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.core.schema import NodeWithScore
 from llama_index.core import Document
-from llama_index.core.schema import TextNode
+from llama_index.core.schema import TextNode, QueryBundle
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 import psycopg2
@@ -184,13 +184,14 @@ class PGVectorStoreWithLlamaIndex():
         return retriever
 
 
+
 if __name__ == "__main__":
 
     from llama_index.llms.openai import OpenAI
 
-    query_str = "Who does Paul Graham think of with the word schtick?"
+    query_str = "Who does Paul Graham think of with the word, 'schtick'?"
     print(f"query_str: {query_str}")
-    
+
     llm = OpenAI(
     model=generating_model_name, # api_key="some key",  # uses OPENAI_API_KEY env var by default
     )
@@ -203,6 +204,13 @@ if __name__ == "__main__":
     from llama_index.core.query_engine import RetrieverQueryEngine
 
     query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm)
+    retrieved_nodes = query_engine.retriever._retrieve(QueryBundle(query_str))   
+    print(f"retrieved_nodes: {retrieved_nodes}")
+
+    # kotaemon format
+    retrieved_nodes_for_kotaemon, scores_for_kotaemon = query_engine.retriever.retrieve_for_kotaemon(QueryBundle(query_str))
+    print(f"retrieved_nodes_for_kotaemon: {retrieved_nodes_for_kotaemon}")
+    print(f"scores_for_kotaemon: {scores_for_kotaemon}")
 
     response = query_engine.query(query_str)
     print(str(response))
