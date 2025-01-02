@@ -8,7 +8,7 @@
 # https://docs.llamaindex.ai/en/stable/examples/low_level/oss_ingestion_retrieval/
 
 
-# The sequence of operations fir RAG: 
+# The sequence of operations for RAG: 
 # Init'ing, Loading, indexing, storing, querying, generating
 
 from typing import Any, Dict, List, Optional, Type, cast
@@ -138,11 +138,6 @@ class PGVectorStoreWithLlamaIndex():
         # print(f"Each Document type: {type(self.documents[0])}")
         return self.documents
     
-    # def build_index(self):
-    #     self.index = VectorStoreIndex.from_documents(
-    #         self.documents, storage_context=self.storage_context, show_progress=True
-    #     )
-    #     self.query_engine = self.index.as_query_engine()
 
     def query(self, query_string: str) -> str:
         return self.query_engine.query(query_string)
