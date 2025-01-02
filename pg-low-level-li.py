@@ -78,7 +78,7 @@ class PGVectorStoreWithLlamaIndex():
         # Thats it! We're using the low-level interface to create a context
     
     
-    def generate_embeddings(self, documents: List[Document]):
+    def generate_embeddings(self, documents: List[Document]) -> List[TextNode]:
 
         self.embed_model = OpenAIEmbedding(model=embed_model_name)       
         
