@@ -15,7 +15,7 @@ class VectorDBRetriever(BaseRetriever):
         vector_store: PGVectorStore,
         embed_model: Any,
         query_mode: str = "default",
-        similarity_top_k: int = 2,
+        similarity_top_k: int = 5,
     ) -> None:
         """Init params."""
         self._vector_store = vector_store
@@ -24,8 +24,34 @@ class VectorDBRetriever(BaseRetriever):
         self._similarity_top_k = similarity_top_k
         super().__init__()
 
+
+    def retrieve_for_kotaemon(self, query_bundle: QueryBundle) -> tuple[list[list[float]], list[float]]:
+        """Retrieve only for the kotaemon format."""
+        query_embedding = self._embed_model.get_query_embedding(
+            query_bundle.query_str
+        )
+        vector_store_query = VectorStoreQuery(
+            query_embedding=query_embedding,
+            similarity_top_k=self._similarity_top_k,
+            mode=self._query_mode,
+        )
+        query_result = self._vector_store.query(vector_store_query)
+
+        nodes = []
+        scores = []
+        for index, node in enumerate(query_result.nodes):
+            score: Optional[float] = None
+            if query_result.similarities is not None:
+                score = query_result.similarities[index]
+            nodes.append(node)
+            scores.append(score)
+        return tuple(nodes, scores)
+
+
     def _retrieve(self, query_bundle: QueryBundle) -> List[NodeWithScore]:
-        """Retrieve."""
+        """Retrieve.
+        score is the cosine similarity between the query and the nodes
+        """
         query_embedding = self._embed_model.get_query_embedding(
             query_bundle.query_str
         )
