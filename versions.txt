@@ -1,0 +1,6 @@
+(LI-tut) furiosa@rngd-us-01:~/LI-tut$ pip list | grep llama
+llama-cloud                        0.1.7
+llama-index-core                   0.12.9
+llama-index-embeddings-openai      0.3.1
+llama-index-vector-stores-postgres 0.4.1
+llamaindex-py-client               0.1.19
