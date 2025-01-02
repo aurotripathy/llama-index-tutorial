@@ -4,6 +4,7 @@
 # https://docs.llamaindex.ai/en/v0.10.17/examples/vector_stores/postgres.html
 
 # This low-level interface is very helpful
+# Look for side tab, Building Retrieval from Scratch
 # https://docs.llamaindex.ai/en/stable/examples/low_level/oss_ingestion_retrieval/
 
 
@@ -14,10 +15,10 @@ import os
 from typing import Any, Optional, cast
 
 from llama_index.core import SimpleDirectoryReader, StorageContext
-from llama_index.core import SimpleDirectoryReader, StorageContext
 
 from llama_index.core import VectorStoreIndex
 from llama_index.vector_stores.postgres import PGVectorStore
+from llama_index.core.schema import NodeWithScore
 import psycopg2
 
 # class PGVectorStoreWithLlamaIndex(LlamaIndexVectorStore):
@@ -131,7 +132,8 @@ class PGVectorStoreWithLlamaIndex():
     def query(self, query_string: str) -> str:
         return self.query_engine.query(query_string)
 
-    def query_low_level(self, query_string: str) -> str:
+    
+    def query_for_low_level_results(self, query_string: str) -> List[NodeWithScore]:
 
         # Generate a Query Embedding
         query_embedding = self.embed_model.get_query_embedding(query_string)
@@ -150,20 +152,41 @@ class PGVectorStoreWithLlamaIndex():
         # returns a VectorStoreQueryResult
         query_result = self.vector_store.query(vector_store_query)
 
-        from llama_index.core.schema import NodeWithScore
+        
         nodes_with_scores = []
         for index, node in enumerate(query_result.nodes):
             score: Optional[float] = None
             if query_result.similarities is not None:
                 score = query_result.similarities[index]
             nodes_with_scores.append(NodeWithScore(node=node, score=score))
+            nodes.append(node)
             print(f"***** score: {score}\n***** node content: {node.get_content()}")
         return nodes_with_scores
 
+    def build_retriever(self):
+        from retriever import VectorDBRetriever
+        retriever = VectorDBRetriever(vector_store=self.vector_store, embed_model=self.embed_model)
+        return retriever
+
 
 if __name__ == "__main__":
+
+    from llama_index.llms.openai import OpenAI
+
+    query_str = "Who does Paul Graham think of with the word schtick?"
+    llm = OpenAI(
+    model="gpt-4o-mini",
+    # api_key="some key",  # uses OPENAI_API_KEY env var by default
+    )
     pgvector = PGVectorStoreWithLlamaIndex(url="postgresql://postgres:password@localhost:5432", document_names="data/") # directory, not file
     documents = pgvector.load_data("data")
     nodes = pgvector.generate_embeddings(documents)
     pgvector.add_nodes_to_pgvector_DB(nodes)
-    pgvector.query_low_level("Who does Paul Graham think of with the word schtick?")
+    # retrieved_nodes = pgvector.query_for_low_level_results(query_str)
+    retriever = pgvector.build_retriever()
+    from llama_index.core.query_engine import RetrieverQueryEngine
+
+    query_engine = RetrieverQueryEngine.from_args(retriever, llm=llm)
+
+    response = query_engine.query(query_str)
+    print(str(response))
